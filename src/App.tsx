@@ -1,26 +1,60 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import QuizList from "./components/QuizList";
+import QuizEditor from "./components/QuizEditor";
+import QuizTaker from "./components/QuizTaker";
+import ResultViewer from "./components/ResultViewer";
+import { Quiz } from "./types";
+import { getQuizzes, saveQuiz } from "./quizService";
 
-function App() {
+const App: React.FC = () => {
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
+  const [takingQuiz, setTakingQuiz] = useState<Quiz | null>(null);
+  const [results, setResults] = useState<any>(null);
+
+  useEffect(() => {
+    getQuizzes().then(setQuizzes);
+  }, []);
+
+  const handleCreateQuiz = (name: string) => {
+    const newQuiz = { id: Date.now().toString(), name, questions: [] };
+    setEditingQuiz(newQuiz);
+  };
+
+  const handleSaveQuiz = (quiz: Quiz) => {
+    saveQuiz(quiz).then(() => {
+      setEditingQuiz(null);
+      getQuizzes().then(setQuizzes);
+    });
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container mx-auto p-4">
+      {!editingQuiz && !takingQuiz && !results && (
+        <QuizList
+          onCreate={handleCreateQuiz}
+          onEdit={(quiz) => setEditingQuiz(quiz)}
+          onTake={(quiz) => setTakingQuiz(quiz)}
+        />
+      )}
+      {editingQuiz && (
+        <QuizEditor
+          quiz={editingQuiz}
+          onSave={() => handleSaveQuiz(editingQuiz)}
+        />
+      )}
+      {takingQuiz && (
+        <QuizTaker
+          quiz={takingQuiz}
+          onComplete={(res) => {
+            setResults(res);
+            setTakingQuiz(null);
+          }}
+        />
+      )}
+      {results && <ResultViewer results={results} />}
     </div>
   );
-}
+};
 
 export default App;
