@@ -4,7 +4,7 @@ import QuizEditor from "./components/QuizEditor";
 import QuizTaker from "./components/QuizTaker";
 import ResultViewer from "./components/ResultViewer";
 import { Quiz } from "./types";
-import { getQuizzes, saveQuiz } from "./quizService";
+import { getQuizzes, saveQuiz, deleteQuiz } from "./quizService";
 
 const App: React.FC = () => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -22,8 +22,15 @@ const App: React.FC = () => {
   };
 
   const handleSaveQuiz = (quiz: Quiz) => {
+    
     saveQuiz(quiz).then(() => {
       setEditingQuiz(null);
+      getQuizzes().then(setQuizzes);
+    });
+  };
+
+  const handleDeleteQuiz = (id: string) => {
+    deleteQuiz(id).then(() => {
       getQuizzes().then(setQuizzes);
     });
   };
@@ -32,9 +39,11 @@ const App: React.FC = () => {
     <div className="container mx-auto p-4">
       {!editingQuiz && !takingQuiz && !results && (
         <QuizList
+          quizzes={quizzes}
           onCreate={handleCreateQuiz}
           onEdit={(quiz) => setEditingQuiz(quiz)}
           onTake={(quiz) => setTakingQuiz(quiz)}
+          onDelete={handleDeleteQuiz}
         />
       )}
       {editingQuiz && (

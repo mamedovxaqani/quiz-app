@@ -56,15 +56,10 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quiz, onSave }) => {
 
     const newQuiz = { id: quiz?.id || Date.now().toString(), name, questions };
 
-    getQuizzes().then((existingQuizzes) => {
-      const updatedQuizzes = existingQuizzes.map((q) =>
-        q.id === newQuiz.id ? newQuiz : q
-      );
-      if (!existingQuizzes.find((q) => q.id === newQuiz.id)) {
-        updatedQuizzes.push(newQuiz);
-      }
-      localStorage.setItem("quizzes", JSON.stringify(updatedQuizzes));
-      onSave();
+    console.log("Saving quiz with questions:", newQuiz);
+
+    saveQuiz(newQuiz).then(() => {
+      console.log(newQuiz);
     });
   };
 
@@ -106,6 +101,8 @@ const QuizEditor: React.FC<QuizEditorProps> = ({ quiz, onSave }) => {
       },
     ];
     setQuestions(newQuestions);
+
+    console.log("Added new question:", newQuestions);
   };
 
   const removeQuestion = (id: string) => {
